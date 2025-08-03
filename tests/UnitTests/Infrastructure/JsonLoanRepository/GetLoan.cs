@@ -1,20 +1,34 @@
-using NSubstitute;
-using Library.ApplicationCore;
-using Library.ApplicationCore.Entities;
-
-namespace Library.UnitTests.Infrastructure.JsonLoanRepository;
+ using NSubstitute;
+ using Library.ApplicationCore;
+ using Library.ApplicationCore.Entities;
+ using Library.Infrastructure.Data;
+ using Microsoft.Extensions.Configuration;
+namespace Library.UnitTests.Infrastructure;
 
 public class GetLoan
 {
-    // TODO: Add private readonly fields for mock dependencies
-    // private readonly IFileSystem _mockFileSystem;
-    // private readonly JsonLoanRepository _jsonLoanRepository;
+    private readonly ILoanRepository _mockLoanRepository;
+    private readonly JsonLoanRepository _jsonLoanRepository;
+    private readonly IConfiguration _configuration;
+    private readonly JsonData _jsonData;
 
     public GetLoan()
     {
-        // TODO: Initialize mock dependencies and repository
-        // _mockFileSystem = Substitute.For<IFileSystem>();
-        // _jsonLoanRepository = new JsonLoanRepository(_mockFileSystem);
+        _mockLoanRepository = Substitute.For<ILoanRepository>();
+        
+        _configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["JsonPaths:Authors"] = "test-authors.json",
+                ["JsonPaths:Books"] = "test-books.json",
+                ["JsonPaths:BookItems"] = "test-bookitems.json",
+                ["JsonPaths:Patrons"] = "test-patrons.json",
+                ["JsonPaths:Loans"] = "test-loans.json"
+            }) 
+            .Build();
+        
+        _jsonData = new JsonData(_configuration);
+        _jsonLoanRepository = new JsonLoanRepository(_jsonData);
     }
 
     [Fact(DisplayName = "JsonLoanRepository.GetLoan: Returns loan when found")]
